@@ -139,7 +139,7 @@
             min-height: 180px;
         }
         
-        /* Page 3 Styles */
+        /* Identification Games Styles */
         .game-options { display: flex; justify-content: center; align-items: center; gap: 30px; min-height: 160px; }
         .game-options img { border: 5px solid transparent; }
         .game-options img.correct { border-color: #4CAF50; box-shadow: 0 0 20px #4CAF50;}
@@ -180,7 +180,7 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            gap: 15px; /* Added more space between individual coins */
+            gap: 15px;
             padding: 10px;
             border-radius: 10px;
         }
@@ -189,7 +189,7 @@
             transition: transform 0.1s;
         }
         .quiz-coin:active {
-            transform: scale(0.85); /* Fun squeeze effect when touched */
+            transform: scale(0.85); 
         }
         .quiz-options { display: flex; justify-content: center; gap: 20px; }
         .quiz-options button { font-size: 24px; padding: 15px 30px; }
@@ -200,7 +200,6 @@
 <body>
 
 <div id="app">
-    <!-- Page 1: Introduction -->
     <div id="page-1" class="page active">
         <h1>What is Money?</h1>
         <p id="p1-text" style="font-size: 24px;">When we buy something we pay with money. Money consists of notes and coins.</p>
@@ -209,7 +208,6 @@
         <img src="shopping.png" class="shopping-img" alt="Shopping Cart">
     </div>
 
-    <!-- Page 2: Meet the Coins -->
     <div id="page-2" class="page">
         <h1>Meet the Coins</h1>
         <p>Touch a coin to hear its name!</p>
@@ -233,19 +231,39 @@
         </div>
     </div>
 
-    <!-- Page 3: Touch the Coin Game -->
     <div id="page-3" class="page">
-        <h1>Find the Coin!</h1>
-        <button class="audio-btn" onclick="playP3Instruction()">🔊 Read Instruction</button>
-        <h2 id="p3-instruction">Touch the...</h2>
-        <div class="game-options" id="p3-options">
-            <!-- Populated by JS -->
-        </div>
+        <h1>Find the Penny!</h1>
+        <button class="audio-btn" onclick="speakText('Touch the penny')">🔊 Read Instruction</button>
+        <h2>Touch the penny...</h2>
+        <div class="game-options" id="p3-options"></div>
         <div class="feedback" id="p3-feedback"></div>
     </div>
 
-    <!-- Page 4: Touch to Sort -->
     <div id="page-4" class="page">
+        <h1>Find the Nickel!</h1>
+        <button class="audio-btn" onclick="speakText('Touch the nickel')">🔊 Read Instruction</button>
+        <h2>Touch the nickel...</h2>
+        <div class="game-options" id="p4-options"></div>
+        <div class="feedback" id="p4-feedback"></div>
+    </div>
+
+    <div id="page-5" class="page">
+        <h1>Find the Dime!</h1>
+        <button class="audio-btn" onclick="speakText('Touch the dime')">🔊 Read Instruction</button>
+        <h2>Touch the dime...</h2>
+        <div class="game-options" id="p5-options"></div>
+        <div class="feedback" id="p5-feedback"></div>
+    </div>
+
+    <div id="page-6" class="page">
+        <h1>Find the Quarter!</h1>
+        <button class="audio-btn" onclick="speakText('Touch the quarter')">🔊 Read Instruction</button>
+        <h2>Touch the quarter...</h2>
+        <div class="game-options" id="p6-options"></div>
+        <div class="feedback" id="p6-feedback"></div>
+    </div>
+
+    <div id="page-7" class="page">
         <h1>Sort the Coins</h1>
         <p>Touch a coin to select it, then touch the correct box to place it.<br>If you make a mistake, touch the coin in the box to send it back.</p>
         <div class="drop-container">
@@ -261,11 +279,10 @@
             <img src="nickel.png" id="drag-nickel" class="coin-img size-large-nickel nickel-color" onclick="tapCoin(this, event)" alt="Nickel">
         </div>
         <button onclick="checkSorting()">Check Answers</button>
-        <div class="feedback" id="p4-feedback"></div>
+        <div class="feedback" id="p7-feedback"></div>
     </div>
 
-    <!-- Page 5: Coin Values -->
-    <div id="page-5" class="page">
+    <div id="page-8" class="page">
         <h1>Coin Values</h1>
         <div style="font-size: 28px; line-height: 2; display: flex; flex-direction: column; align-items: center; gap: 15px;">
             <div><img src="penny.png" class="small-coin size-small-penny penny-color" alt="Penny"> Penny = 1¢</div>
@@ -275,42 +292,8 @@
         </div>
     </div>
 
-    <!-- Page 6: Penny Quiz -->
-    <div id="page-6" class="page">
-        <h1 id="p6-title">Penny Quiz</h1>
-        <div class="feedback" id="p6-count">Question 1 of 10</div>
-        <h2 id="p6-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p6-visuals"></div>
-        <div class="quiz-options" id="p6-options"></div>
-        <div class="feedback" id="p6-feedback"></div>
-    </div>
-
-    <!-- Page 7: Nickel Quiz -->
-    <div id="page-7" class="page">
-        <h1 id="p7-title">Nickel Quiz</h1>
-        <div class="feedback" id="p7-count">Question 1 of 10</div>
-        <h2 id="p7-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p7-visuals"></div>
-        <div class="quiz-options" id="p7-options"></div>
-        <div class="feedback" id="p7-feedback"></div>
-    </div>
-
-    <!-- Page 8: Dime Quiz -->
-    <div id="page-8" class="page">
-        <h1 id="p8-title">Dime Quiz</h1>
-        <div class="feedback" id="p8-count">Question 1 of 10</div>
-        <h2 id="p8-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p8-visuals"></div>
-        <div class="quiz-options" id="p8-options"></div>
-        <div class="feedback" id="p8-feedback"></div>
-    </div>
-
-    <!-- Page 9: Quarter Quiz -->
     <div id="page-9" class="page">
-        <h1 id="p9-title">Quarter Quiz</h1>
+        <h1 id="p9-title">Penny Quiz</h1>
         <div class="feedback" id="p9-count">Question 1 of 10</div>
         <h2 id="p9-question">How much is this worth?</h2>
         <p class="hint-text">(Touch each coin to count out loud)</p>
@@ -319,18 +302,47 @@
         <div class="feedback" id="p9-feedback"></div>
     </div>
 
-    <!-- Navigation & Page Indicator -->
+    <div id="page-10" class="page">
+        <h1 id="p10-title">Nickel Quiz</h1>
+        <div class="feedback" id="p10-count">Question 1 of 10</div>
+        <h2 id="p10-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p10-visuals"></div>
+        <div class="quiz-options" id="p10-options"></div>
+        <div class="feedback" id="p10-feedback"></div>
+    </div>
+
+    <div id="page-11" class="page">
+        <h1 id="p11-title">Dime Quiz</h1>
+        <div class="feedback" id="p11-count">Question 1 of 10</div>
+        <h2 id="p11-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p11-visuals"></div>
+        <div class="quiz-options" id="p11-options"></div>
+        <div class="feedback" id="p11-feedback"></div>
+    </div>
+
+    <div id="page-12" class="page">
+        <h1 id="p12-title">Quarter Quiz</h1>
+        <div class="feedback" id="p12-count">Question 1 of 10</div>
+        <h2 id="p12-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p12-visuals"></div>
+        <div class="quiz-options" id="p12-options"></div>
+        <div class="feedback" id="p12-feedback"></div>
+    </div>
+
     <div class="nav-buttons">
         <button id="btn-prev" onclick="changePage(-1)" style="display:none;">Previous</button>
         <button id="btn-next" onclick="changePage(1)">Next Page</button>
     </div>
     
-    <div id="page-indicator">Page 1 of 9</div>
+    <div id="page-indicator">Page 1 of 12</div>
 </div>
 
 <script>
     // --- Data and Variables ---
-    const totalPages = 9;
+    const totalPages = 12;
     let currentPage = 1;
 
     const coins = {
@@ -364,52 +376,55 @@
 
         updatePageIndicator();
 
-        if(currentPage === 3) initPage3();
-        if(currentPage === 6) initMathQuiz(6, 'penny');
-        if(currentPage === 7) initMathQuiz(7, 'nickel');
-        if(currentPage === 8) initMathQuiz(8, 'dime');
-        if(currentPage === 9) initMathQuiz(9, 'quarter');
+        // Initialize specific pages
+        if(currentPage === 3) initIdentifyCoin(3, 'penny');
+        if(currentPage === 4) initIdentifyCoin(4, 'nickel');
+        if(currentPage === 5) initIdentifyCoin(5, 'dime');
+        if(currentPage === 6) initIdentifyCoin(6, 'quarter');
+        if(currentPage === 9) initMathQuiz(9, 'penny');
+        if(currentPage === 10) initMathQuiz(10, 'nickel');
+        if(currentPage === 11) initMathQuiz(11, 'dime');
+        if(currentPage === 12) initMathQuiz(12, 'quarter');
     }
 
     // Initialize indicator on load
     updatePageIndicator();
 
-    // --- Page 3 Logic (Find the Coin) ---
-    let p3Target = null;
-    function initPage3() {
-        let keys = Object.keys(coins);
-        p3Target = coins[keys[Math.floor(Math.random() * keys.length)]];
+    // --- Pages 3-6 Logic (Identify the Specific Coin) ---
+    function initIdentifyCoin(pageNum, targetCoinKey) {
+        let targetCoin = coins[targetCoinKey];
         
+        // Pick a random wrong coin
+        let keys = Object.keys(coins);
         let wrongKey = keys[Math.floor(Math.random() * keys.length)];
-        while(wrongKey === p3Target.name) {
+        while(wrongKey === targetCoinKey) {
             wrongKey = keys[Math.floor(Math.random() * keys.length)];
         }
         let wrongCoin = coins[wrongKey];
 
-        document.getElementById('p3-instruction').innerText = `Touch the ${p3Target.name}`;
-        document.getElementById('p3-feedback').innerText = "";
+        // Clear feedback
+        document.getElementById(`p${pageNum}-feedback`).innerText = "";
         
+        // Generate options (Target + Random Wrong Coin)
         let optionsHtml = '';
-        let opts = [p3Target, wrongCoin].sort(() => Math.random() - 0.5);
+        let opts = [targetCoin, wrongCoin].sort(() => Math.random() - 0.5);
         
         opts.forEach(c => {
-            optionsHtml += `<img src="${c.src}" class="coin-img ${c.largeClass} ${c.colorClass}" alt="${c.name}" onclick="checkP3Answer('${c.name}', this)">`;
+            optionsHtml += `<img src="${c.src}" class="coin-img ${c.largeClass} ${c.colorClass}" alt="${c.name}" onclick="checkIdentifyAnswer(${pageNum}, '${c.name}', '${targetCoinKey}', this)">`;
         });
-        document.getElementById('p3-options').innerHTML = optionsHtml;
+        document.getElementById(`p${pageNum}-options`).innerHTML = optionsHtml;
         
-        speakText(`Touch the ${p3Target.name}`);
+        speakText(`Touch the ${targetCoin.name}`);
     }
 
-    function playP3Instruction() {
-        if(p3Target) speakText(`Touch the ${p3Target.name}`);
-    }
-
-    function checkP3Answer(selectedName, imgElement) {
-        if(selectedName === p3Target.name) {
+    function checkIdentifyAnswer(pageNum, selectedName, targetCoinKey, imgElement) {
+        if(selectedName === targetCoinKey) {
             imgElement.classList.add('correct');
-            document.getElementById('p3-feedback').innerText = "Correct!";
+            document.getElementById(`p${pageNum}-feedback`).innerText = "Correct!";
             speakText('Correct!');
-            setTimeout(initPage3, 2000); 
+            
+            // Reload the same page after 2 seconds to give a new comparison
+            setTimeout(() => initIdentifyCoin(pageNum, targetCoinKey), 2000); 
         } else {
             imgElement.classList.add('wrong');
             speakText('Try again');
@@ -417,7 +432,7 @@
         }
     }
 
-    // --- Page 4 Logic (Touch and Go Back Sorting) ---
+    // --- Page 7 Logic (Touch and Go Back Sorting) ---
     let activeSortCoin = null;
 
     function tapCoin(coinElem, ev) {
@@ -463,7 +478,7 @@
         if(dCheck) correctCount++;
         if(qCheck) correctCount++;
 
-        let fb = document.getElementById('p4-feedback');
+        let fb = document.getElementById('p7-feedback');
         if(correctCount === 4) {
             fb.innerText = "Great Job! All correct!";
             fb.style.color = "green";
@@ -475,7 +490,7 @@
         }
     }
 
-    // --- Page 6-9 Logic (Math Quizzes & Counting out loud) ---
+    // --- Pages 9-12 Logic (Math Quizzes & Counting out loud) ---
     let quizState = {};
 
     function initMathQuiz(pageNum, coinKey) {
@@ -494,7 +509,6 @@
         
         let visualHtml = '';
         for(let i=0; i<amount; i++) {
-            // Calculate what number to speak when this specific coin is clicked
             let readValue = (i + 1) * state.coin.value;
             visualHtml += `<img src="${state.coin.src}" class="small-coin ${state.coin.smallClass} ${state.coin.colorClass} quiz-coin" alt="${state.coin.name}" title="Touch me!" onclick="speakText('${readValue}')">`;
         }
