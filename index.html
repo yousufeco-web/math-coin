@@ -55,6 +55,8 @@
         
         .audio-btn { background-color: #008CBA; }
         .audio-btn:hover { background-color: #007399; }
+        .play-again-btn { background-color: #f0ad4e; }
+        .play-again-btn:hover { background-color: #ec971f; }
         
         /* Page Indicator */
         #page-indicator {
@@ -160,14 +162,28 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
+        .dropzone-large-text { font-size: 32px; color: #333; }
+        .dropzone-small { width: 80px; height: 80px; margin-top: 10px; background-color: #fafafa; }
         .dropzone:hover { background-color: #f9f9f9; }
+        
         .drag-container { 
             display: flex; justify-content: space-around; align-items: center;
             min-height: 150px; border: 2px solid #eee; padding: 10px; border-radius: 10px;
         }
         
-        /* Highlight for selected coin to sort */
-        .selected-coin {
+        /* Drag Number Styles (Page 11) */
+        .drag-number {
+            width: 60px; height: 60px;
+            background: white; border: 3px solid #333; border-radius: 10px;
+            font-size: 28px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; user-select: none; margin: 5px;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .drag-number:active { transform: scale(0.9); }
+
+        /* Highlight for selected coin/number */
+        .selected-coin, .selected-number {
             border: 4px solid #008CBA !important;
             transform: scale(1.15) !important;
             box-shadow: 0 0 15px #008CBA !important;
@@ -184,17 +200,21 @@
             padding: 10px;
             border-radius: 10px;
         }
-        .quiz-coin {
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .quiz-coin:active {
-            transform: scale(0.85); 
-        }
+        .quiz-coin { cursor: pointer; transition: transform 0.1s; }
+        .quiz-coin:active { transform: scale(0.85); }
         .quiz-options { display: flex; justify-content: center; gap: 20px; }
         .quiz-options button { font-size: 24px; padding: 15px 30px; }
         .feedback { font-size: 24px; font-weight: bold; color: #4CAF50; height: 30px; margin-top: 10px;}
         .hint-text { font-size: 16px; color: #666; font-style: italic; margin-bottom: 5px;}
+        
+        /* Box for holding generated pennies */
+        .pennies-box {
+            width: 200px; height: 160px;
+            border: 2px solid #ccc; background: #fff;
+            border-radius: 10px;
+            display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
+            padding: 10px; box-sizing: border-box; gap: 5px;
+        }
     </style>
 </head>
 <body>
@@ -293,17 +313,27 @@
     </div>
 
     <div id="page-9" class="page">
-        <h1 id="p9-title">Penny Quiz</h1>
-        <div class="feedback" id="p9-count">Question 1 of 10</div>
-        <h2 id="p9-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p9-visuals"></div>
-        <div class="quiz-options" id="p9-options"></div>
+        <h1>Match the Value</h1>
+        <p>Touch a coin to select it, then touch the box with its value.<br>If you make a mistake, touch the coin in the box to send it back.</p>
+        <div class="drop-container">
+            <div class="dropzone dropzone-large-text" id="val-drop-1" onclick="placeCoinInValueBox('val-drop-1')">1¢</div>
+            <div class="dropzone dropzone-large-text" id="val-drop-5" onclick="placeCoinInValueBox('val-drop-5')">5¢</div>
+            <div class="dropzone dropzone-large-text" id="val-drop-10" onclick="placeCoinInValueBox('val-drop-10')">10¢</div>
+            <div class="dropzone dropzone-large-text" id="val-drop-25" onclick="placeCoinInValueBox('val-drop-25')">25¢</div>
+        </div>
+        <div class="drag-container" id="val-drag-source">
+            <img src="quarter.png" id="val-drag-quarter" class="coin-img size-large-quarter quarter-color" onclick="tapValueCoin(this, event)" alt="Quarter">
+            <img src="penny.png" id="val-drag-penny" class="coin-img size-large-penny penny-color" onclick="tapValueCoin(this, event)" alt="Penny">
+            <img src="nickel.png" id="val-drag-nickel" class="coin-img size-large-nickel nickel-color" onclick="tapValueCoin(this, event)" alt="Nickel">
+            <img src="dime.png" id="val-drag-dime" class="coin-img size-large-dime dime-color" onclick="tapValueCoin(this, event)" alt="Dime">
+        </div>
+        <button onclick="checkValueSorting()">Check Answers</button>
+        <button class="play-again-btn" onclick="resetValueSorting()">Play Again</button>
         <div class="feedback" id="p9-feedback"></div>
     </div>
 
     <div id="page-10" class="page">
-        <h1 id="p10-title">Nickel Quiz</h1>
+        <h1 id="p10-title">Penny Quiz</h1>
         <div class="feedback" id="p10-count">Question 1 of 10</div>
         <h2 id="p10-question">How much is this worth?</h2>
         <p class="hint-text">(Touch each coin to count out loud)</p>
@@ -313,17 +343,27 @@
     </div>
 
     <div id="page-11" class="page">
-        <h1 id="p11-title">Dime Quiz</h1>
-        <div class="feedback" id="p11-count">Question 1 of 10</div>
-        <h2 id="p11-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p11-visuals"></div>
-        <div class="quiz-options" id="p11-options"></div>
+        <h1>Count the Pennies</h1>
+        <p>Count the pennies, touch the correct number, and drop it in the box below.</p>
+        <div class="drop-container" style="justify-content: center; gap: 40px; margin-bottom: 20px;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="pennies-box" id="pennies-box-1"></div>
+                <div class="dropzone dropzone-small" id="count-drop-1" onclick="placeNumberInBox('count-drop-1')"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="pennies-box" id="pennies-box-2"></div>
+                <div class="dropzone dropzone-small" id="count-drop-2" onclick="placeNumberInBox('count-drop-2')"></div>
+            </div>
+        </div>
+        
+        <div class="drag-container" id="num-drag-source" style="min-height: 80px; justify-content: center; gap: 20px;">
+            </div>
+        <button onclick="checkPennyCount()">Check Answers</button>
         <div class="feedback" id="p11-feedback"></div>
     </div>
 
     <div id="page-12" class="page">
-        <h1 id="p12-title">Quarter Quiz</h1>
+        <h1 id="p12-title">Nickel Quiz</h1>
         <div class="feedback" id="p12-count">Question 1 of 10</div>
         <h2 id="p12-question">How much is this worth?</h2>
         <p class="hint-text">(Touch each coin to count out loud)</p>
@@ -332,17 +372,37 @@
         <div class="feedback" id="p12-feedback"></div>
     </div>
 
+    <div id="page-13" class="page">
+        <h1 id="p13-title">Dime Quiz</h1>
+        <div class="feedback" id="p13-count">Question 1 of 10</div>
+        <h2 id="p13-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p13-visuals"></div>
+        <div class="quiz-options" id="p13-options"></div>
+        <div class="feedback" id="p13-feedback"></div>
+    </div>
+
+    <div id="page-14" class="page">
+        <h1 id="p14-title">Quarter Quiz</h1>
+        <div class="feedback" id="p14-count">Question 1 of 10</div>
+        <h2 id="p14-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p14-visuals"></div>
+        <div class="quiz-options" id="p14-options"></div>
+        <div class="feedback" id="p14-feedback"></div>
+    </div>
+
     <div class="nav-buttons">
         <button id="btn-prev" onclick="changePage(-1)" style="display:none;">Previous</button>
         <button id="btn-next" onclick="changePage(1)">Next Page</button>
     </div>
     
-    <div id="page-indicator">Page 1 of 12</div>
+    <div id="page-indicator">Page 1 of 14</div>
 </div>
 
 <script>
     // --- Data and Variables ---
-    const totalPages = 12;
+    const totalPages = 14;
     let currentPage = 1;
 
     const coins = {
@@ -381,10 +441,11 @@
         if(currentPage === 4) initIdentifyCoin(4, 'nickel');
         if(currentPage === 5) initIdentifyCoin(5, 'dime');
         if(currentPage === 6) initIdentifyCoin(6, 'quarter');
-        if(currentPage === 9) initMathQuiz(9, 'penny');
-        if(currentPage === 10) initMathQuiz(10, 'nickel');
-        if(currentPage === 11) initMathQuiz(11, 'dime');
-        if(currentPage === 12) initMathQuiz(12, 'quarter');
+        if(currentPage === 10) initMathQuiz(10, 'penny');
+        if(currentPage === 11) initPennyCountGame();
+        if(currentPage === 12) initMathQuiz(12, 'nickel');
+        if(currentPage === 13) initMathQuiz(13, 'dime');
+        if(currentPage === 14) initMathQuiz(14, 'quarter');
     }
 
     // Initialize indicator on load
@@ -394,7 +455,6 @@
     function initIdentifyCoin(pageNum, targetCoinKey) {
         let targetCoin = coins[targetCoinKey];
         
-        // Pick a random wrong coin
         let keys = Object.keys(coins);
         let wrongKey = keys[Math.floor(Math.random() * keys.length)];
         while(wrongKey === targetCoinKey) {
@@ -402,10 +462,8 @@
         }
         let wrongCoin = coins[wrongKey];
 
-        // Clear feedback
         document.getElementById(`p${pageNum}-feedback`).innerText = "";
         
-        // Generate options (Target + Random Wrong Coin)
         let optionsHtml = '';
         let opts = [targetCoin, wrongCoin].sort(() => Math.random() - 0.5);
         
@@ -422,8 +480,6 @@
             imgElement.classList.add('correct');
             document.getElementById(`p${pageNum}-feedback`).innerText = "Correct!";
             speakText('Correct!');
-            
-            // Reload the same page after 2 seconds to give a new comparison
             setTimeout(() => initIdentifyCoin(pageNum, targetCoinKey), 2000); 
         } else {
             imgElement.classList.add('wrong');
@@ -432,7 +488,7 @@
         }
     }
 
-    // --- Page 7 Logic (Touch and Go Back Sorting) ---
+    // --- Page 7 Logic (Touch and Go Back Sorting by Name) ---
     let activeSortCoin = null;
 
     function tapCoin(coinElem, ev) {
@@ -490,7 +546,190 @@
         }
     }
 
-    // --- Pages 9-12 Logic (Math Quizzes & Counting out loud) ---
+    // --- Page 9 Logic (Touch and Go Back Sorting by Value) ---
+    let activeValueSortCoin = null;
+
+    function tapValueCoin(coinElem, ev) {
+        ev.stopPropagation(); 
+        
+        if (coinElem.parentElement.id !== 'val-drag-source') {
+            document.getElementById('val-drag-source').appendChild(coinElem);
+            if (activeValueSortCoin === coinElem) {
+                activeValueSortCoin.classList.remove('selected-coin');
+                activeValueSortCoin = null;
+            }
+        } 
+        else {
+            if (activeValueSortCoin) activeValueSortCoin.classList.remove('selected-coin');
+            
+            if (activeValueSortCoin !== coinElem) {
+                activeValueSortCoin = coinElem;
+                activeValueSortCoin.classList.add('selected-coin');
+                speakText(coinElem.alt + " selected");
+            } else {
+                activeValueSortCoin = null;
+            }
+        }
+    }
+
+    function placeCoinInValueBox(boxId) {
+        if (activeValueSortCoin) {
+            document.getElementById(boxId).appendChild(activeValueSortCoin);
+            activeValueSortCoin.classList.remove('selected-coin');
+            activeValueSortCoin = null;
+        }
+    }
+
+    function checkValueSorting() {
+        let correctCount = 0;
+        let pCheck = document.getElementById('val-drop-1').querySelector('#val-drag-penny');
+        let nCheck = document.getElementById('val-drop-5').querySelector('#val-drag-nickel');
+        let dCheck = document.getElementById('val-drop-10').querySelector('#val-drag-dime');
+        let qCheck = document.getElementById('val-drop-25').querySelector('#val-drag-quarter');
+        
+        if(pCheck) correctCount++;
+        if(nCheck) correctCount++;
+        if(dCheck) correctCount++;
+        if(qCheck) correctCount++;
+
+        let fb = document.getElementById('p9-feedback');
+        if(correctCount === 4) {
+            fb.innerText = "Great Job! All values match!";
+            fb.style.color = "green";
+            speakText("Great Job! All values match!");
+        } else {
+            fb.innerText = `You got ${correctCount} out of 4 correct. Try again!`;
+            fb.style.color = "red";
+            speakText("Try again!");
+        }
+    }
+
+    function resetValueSorting() {
+        let sourceContainer = document.getElementById('val-drag-source');
+        
+        let pElem = document.getElementById('val-drag-penny');
+        let nElem = document.getElementById('val-drag-nickel');
+        let dElem = document.getElementById('val-drag-dime');
+        let qElem = document.getElementById('val-drag-quarter');
+        
+        if(qElem) sourceContainer.appendChild(qElem);
+        if(pElem) sourceContainer.appendChild(pElem);
+        if(nElem) sourceContainer.appendChild(nElem);
+        if(dElem) sourceContainer.appendChild(dElem);
+        
+        document.getElementById('p9-feedback').innerText = "";
+        if (activeValueSortCoin) {
+            activeValueSortCoin.classList.remove('selected-coin');
+            activeValueSortCoin = null;
+        }
+    }
+
+    // --- Page 11 Logic (Count the Pennies Game) ---
+    let activeCountNumber = null;
+    let currentPennyCounts = [0, 0];
+
+    function initPennyCountGame() {
+        // Clear old state
+        document.getElementById('p11-feedback').innerText = "";
+        if (activeCountNumber) {
+            activeCountNumber.classList.remove('selected-number');
+            activeCountNumber = null;
+        }
+
+        // Generate 2 random numbers (1 to 9)
+        let num1 = Math.floor(Math.random() * 9) + 1;
+        let num2 = Math.floor(Math.random() * 9) + 1;
+        while (num2 === num1) {
+            num2 = Math.floor(Math.random() * 9) + 1;
+        }
+        currentPennyCounts = [num1, num2];
+
+        // Draw pennies
+        const drawPennies = (count, containerId) => {
+            let html = '';
+            for(let i = 0; i < count; i++) {
+                html += `<img src="penny.png" class="small-coin size-small-penny penny-color" alt="Penny" onclick="speakText('${i+1}')" style="cursor:pointer; transition:transform 0.1s;" onactive="this.style.transform='scale(0.8)'">`;
+            }
+            document.getElementById(containerId).innerHTML = html;
+        };
+        drawPennies(num1, 'pennies-box-1');
+        drawPennies(num2, 'pennies-box-2');
+
+        // Reset dropzones
+        document.getElementById('count-drop-1').innerHTML = "";
+        document.getElementById('count-drop-2').innerHTML = "";
+
+        // Set up draggable numbers
+        let nums = [num1, num2].sort(() => Math.random() - 0.5);
+        let dragHtml = '';
+        nums.forEach(n => {
+            dragHtml += `<div class="drag-number" data-val="${n}" onclick="tapNumber(this, event)">${n}</div>`;
+        });
+        document.getElementById('num-drag-source').innerHTML = dragHtml;
+    }
+
+    function tapNumber(numElem, ev) {
+        ev.stopPropagation(); 
+        
+        if (numElem.parentElement.id !== 'num-drag-source') {
+            // Send back
+            document.getElementById('num-drag-source').appendChild(numElem);
+            if (activeCountNumber === numElem) {
+                activeCountNumber.classList.remove('selected-number');
+                activeCountNumber = null;
+            }
+        } 
+        else {
+            // Select
+            if (activeCountNumber) activeCountNumber.classList.remove('selected-number');
+            
+            if (activeCountNumber !== numElem) {
+                activeCountNumber = numElem;
+                activeCountNumber.classList.add('selected-number');
+                speakText(numElem.innerText);
+            } else {
+                activeCountNumber = null;
+            }
+        }
+    }
+
+    function placeNumberInBox(boxId) {
+        if (activeCountNumber) {
+            let dropzone = document.getElementById(boxId);
+            // If full, send existing item back first
+            if (dropzone.children.length > 0) {
+                document.getElementById('num-drag-source').appendChild(dropzone.children[0]);
+            }
+            dropzone.appendChild(activeCountNumber);
+            activeCountNumber.classList.remove('selected-number');
+            activeCountNumber = null;
+        }
+    }
+
+    function checkPennyCount() {
+        let box1 = document.getElementById('count-drop-1');
+        let box2 = document.getElementById('count-drop-2');
+        
+        let ans1 = box1.children.length > 0 ? parseInt(box1.children[0].dataset.val) : null;
+        let ans2 = box2.children.length > 0 ? parseInt(box2.children[0].dataset.val) : null;
+
+        let fb = document.getElementById('p11-feedback');
+        
+        if (ans1 === currentPennyCounts[0] && ans2 === currentPennyCounts[1]) {
+            fb.innerText = "Correct! Loading next puzzle...";
+            fb.style.color = "green";
+            speakText("Correct!");
+            
+            // Generate a new puzzle after 2 seconds
+            setTimeout(initPennyCountGame, 2000);
+        } else {
+            fb.innerText = "Oops, try again!";
+            fb.style.color = "red";
+            speakText("Oops, try again");
+        }
+    }
+
+    // --- Pages 10, 12-14 Logic (Math Quizzes & Counting out loud) ---
     let quizState = {};
 
     function initMathQuiz(pageNum, coinKey) {
