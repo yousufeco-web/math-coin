@@ -171,7 +171,7 @@
             min-height: 150px; border: 2px solid #eee; padding: 10px; border-radius: 10px;
         }
         
-        /* Drag Number Styles (Page 11) */
+        /* Drag Number Styles (Page 11 & 13) */
         .drag-number {
             width: 60px; height: 60px;
             background: white; border: 3px solid #333; border-radius: 10px;
@@ -207,8 +207,8 @@
         .feedback { font-size: 24px; font-weight: bold; color: #4CAF50; height: 30px; margin-top: 10px;}
         .hint-text { font-size: 16px; color: #666; font-style: italic; margin-bottom: 5px;}
         
-        /* Box for holding generated pennies */
-        .pennies-box {
+        /* Box for holding generated coins in count games */
+        .count-box {
             width: 200px; height: 160px;
             border: 2px solid #ccc; background: #fff;
             border-radius: 10px;
@@ -347,11 +347,11 @@
         <p>Count the pennies, touch the correct number, and drop it in the box below.</p>
         <div class="drop-container" style="justify-content: center; gap: 40px; margin-bottom: 20px;">
             <div style="display: flex; flex-direction: column; align-items: center;">
-                <div class="pennies-box" id="pennies-box-1"></div>
+                <div class="count-box" id="pennies-box-1"></div>
                 <div class="dropzone dropzone-small" id="count-drop-1" onclick="placeNumberInBox('count-drop-1')"></div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center;">
-                <div class="pennies-box" id="pennies-box-2"></div>
+                <div class="count-box" id="pennies-box-2"></div>
                 <div class="dropzone dropzone-small" id="count-drop-2" onclick="placeNumberInBox('count-drop-2')"></div>
             </div>
         </div>
@@ -373,17 +373,28 @@
     </div>
 
     <div id="page-13" class="page">
-        <h1 id="p13-title">Dime Quiz</h1>
-        <div class="feedback" id="p13-count">Question 1 of 10</div>
-        <h2 id="p13-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p13-visuals"></div>
-        <div class="quiz-options" id="p13-options"></div>
+        <h1>Value of the Nickels</h1>
+        <p>Find the value of the nickels, touch the correct amount, and drop it in the box below.</p>
+        <p class="hint-text">(Touch each nickel to count by 5s)</p>
+        <div class="drop-container" style="justify-content: center; gap: 40px; margin-bottom: 20px;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="count-box" id="nickels-box-1"></div>
+                <div class="dropzone dropzone-small" id="count-nickel-drop-1" onclick="placeNickelNumberInBox('count-nickel-drop-1')"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="count-box" id="nickels-box-2"></div>
+                <div class="dropzone dropzone-small" id="count-nickel-drop-2" onclick="placeNickelNumberInBox('count-nickel-drop-2')"></div>
+            </div>
+        </div>
+        
+        <div class="drag-container" id="num-nickel-drag-source" style="min-height: 80px; justify-content: center; gap: 20px;">
+            </div>
+        <button onclick="checkNickelCount()">Check Answers</button>
         <div class="feedback" id="p13-feedback"></div>
     </div>
 
     <div id="page-14" class="page">
-        <h1 id="p14-title">Quarter Quiz</h1>
+        <h1 id="p14-title">Dime Quiz</h1>
         <div class="feedback" id="p14-count">Question 1 of 10</div>
         <h2 id="p14-question">How much is this worth?</h2>
         <p class="hint-text">(Touch each coin to count out loud)</p>
@@ -392,17 +403,27 @@
         <div class="feedback" id="p14-feedback"></div>
     </div>
 
+    <div id="page-15" class="page">
+        <h1 id="p15-title">Quarter Quiz</h1>
+        <div class="feedback" id="p15-count">Question 1 of 10</div>
+        <h2 id="p15-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p15-visuals"></div>
+        <div class="quiz-options" id="p15-options"></div>
+        <div class="feedback" id="p15-feedback"></div>
+    </div>
+
     <div class="nav-buttons">
         <button id="btn-prev" onclick="changePage(-1)" style="display:none;">Previous</button>
         <button id="btn-next" onclick="changePage(1)">Next Page</button>
     </div>
     
-    <div id="page-indicator">Page 1 of 14</div>
+    <div id="page-indicator">Page 1 of 15</div>
 </div>
 
 <script>
     // --- Data and Variables ---
-    const totalPages = 14;
+    const totalPages = 15;
     let currentPage = 1;
 
     const coins = {
@@ -444,8 +465,9 @@
         if(currentPage === 10) initMathQuiz(10, 'penny');
         if(currentPage === 11) initPennyCountGame();
         if(currentPage === 12) initMathQuiz(12, 'nickel');
-        if(currentPage === 13) initMathQuiz(13, 'dime');
-        if(currentPage === 14) initMathQuiz(14, 'quarter');
+        if(currentPage === 13) initNickelCountGame();
+        if(currentPage === 14) initMathQuiz(14, 'dime');
+        if(currentPage === 15) initMathQuiz(15, 'quarter');
     }
 
     // Initialize indicator on load
@@ -476,14 +498,17 @@
     }
 
     function checkIdentifyAnswer(pageNum, selectedName, targetCoinKey, imgElement) {
+        // Enforcing silent reveal correction for pages 6 and 8
+        let shouldSpeak = (pageNum !== 6 && pageNum !== 8);
+
         if(selectedName === targetCoinKey) {
             imgElement.classList.add('correct');
             document.getElementById(`p${pageNum}-feedback`).innerText = "Correct!";
-            speakText('Correct!');
+            if(shouldSpeak) speakText('Correct!');
             setTimeout(() => initIdentifyCoin(pageNum, targetCoinKey), 2000); 
         } else {
             imgElement.classList.add('wrong');
-            speakText('Try again');
+            if(shouldSpeak) speakText('Try again');
             setTimeout(() => imgElement.classList.remove('wrong'), 1000);
         }
     }
@@ -729,7 +754,115 @@
         }
     }
 
-    // --- Pages 10, 12-14 Logic (Math Quizzes & Counting out loud) ---
+    // --- Page 13 Logic (Value of Nickels Game) ---
+    let activeNickelCountNumber = null;
+    let currentNickelValues = [0, 0];
+
+    function initNickelCountGame() {
+        // Clear old state
+        document.getElementById('p13-feedback').innerText = "";
+        if (activeNickelCountNumber) {
+            activeNickelCountNumber.classList.remove('selected-number');
+            activeNickelCountNumber = null;
+        }
+
+        // Generate 2 random numbers of coins (1 to 9)
+        let num1 = Math.floor(Math.random() * 9) + 1;
+        let num2 = Math.floor(Math.random() * 9) + 1;
+        while (num2 === num1) {
+            num2 = Math.floor(Math.random() * 9) + 1;
+        }
+        
+        // Calculate the actual VALUES
+        let val1 = num1 * 5;
+        let val2 = num2 * 5;
+        currentNickelValues = [val1, val2];
+
+        // Draw nickels
+        const drawNickels = (count, containerId) => {
+            let html = '';
+            for(let i = 0; i < count; i++) {
+                // Compute the spoken value to count by 5s (5, 10, 15...)
+                let spokenValue = (i + 1) * 5;
+                html += `<img src="nickel.png" class="small-coin size-small-nickel nickel-color" alt="Nickel" onclick="speakText('${spokenValue}')" style="cursor:pointer; transition:transform 0.1s;" onactive="this.style.transform='scale(0.8)'">`;
+            }
+            document.getElementById(containerId).innerHTML = html;
+        };
+        drawNickels(num1, 'nickels-box-1');
+        drawNickels(num2, 'nickels-box-2');
+
+        // Reset dropzones
+        document.getElementById('count-nickel-drop-1').innerHTML = "";
+        document.getElementById('count-nickel-drop-2').innerHTML = "";
+
+        // Set up draggable numbers using VALUES instead of counts
+        let vals = [val1, val2].sort(() => Math.random() - 0.5);
+        let dragHtml = '';
+        vals.forEach(v => {
+            dragHtml += `<div class="drag-number" data-val="${v}" onclick="tapNickelNumber(this, event)">${v}</div>`;
+        });
+        document.getElementById('num-nickel-drag-source').innerHTML = dragHtml;
+    }
+
+    function tapNickelNumber(numElem, ev) {
+        ev.stopPropagation(); 
+        
+        if (numElem.parentElement.id !== 'num-nickel-drag-source') {
+            document.getElementById('num-nickel-drag-source').appendChild(numElem);
+            if (activeNickelCountNumber === numElem) {
+                activeNickelCountNumber.classList.remove('selected-number');
+                activeNickelCountNumber = null;
+            }
+        } 
+        else {
+            if (activeNickelCountNumber) activeNickelCountNumber.classList.remove('selected-number');
+            
+            if (activeNickelCountNumber !== numElem) {
+                activeNickelCountNumber = numElem;
+                activeNickelCountNumber.classList.add('selected-number');
+                speakText(numElem.innerText);
+            } else {
+                activeNickelCountNumber = null;
+            }
+        }
+    }
+
+    function placeNickelNumberInBox(boxId) {
+        if (activeNickelCountNumber) {
+            let dropzone = document.getElementById(boxId);
+            if (dropzone.children.length > 0) {
+                document.getElementById('num-nickel-drag-source').appendChild(dropzone.children[0]);
+            }
+            dropzone.appendChild(activeNickelCountNumber);
+            activeNickelCountNumber.classList.remove('selected-number');
+            activeNickelCountNumber = null;
+        }
+    }
+
+    function checkNickelCount() {
+        let box1 = document.getElementById('count-nickel-drop-1');
+        let box2 = document.getElementById('count-nickel-drop-2');
+        
+        let ans1 = box1.children.length > 0 ? parseInt(box1.children[0].dataset.val) : null;
+        let ans2 = box2.children.length > 0 ? parseInt(box2.children[0].dataset.val) : null;
+
+        let fb = document.getElementById('p13-feedback');
+        
+        // Check answers against currentNickelValues instead of counts
+        if (ans1 === currentNickelValues[0] && ans2 === currentNickelValues[1]) {
+            fb.innerText = "Correct! Loading next puzzle...";
+            fb.style.color = "green";
+            speakText("Correct!");
+            
+            setTimeout(initNickelCountGame, 2000);
+        } else {
+            fb.innerText = "Oops, try again!";
+            fb.style.color = "red";
+            speakText("Oops, try again");
+        }
+    }
+
+    // --- Pages 10, 12, 14, 15 Logic (Math Quizzes & Counting out loud) ---
     let quizState = {};
 
     function initMathQuiz(pageNum, coinKey) {
