@@ -171,7 +171,7 @@
             min-height: 150px; border: 2px solid #eee; padding: 10px; border-radius: 10px;
         }
         
-        /* Drag Number Styles (Page 11 & 13) */
+        /* Drag Number Styles */
         .drag-number {
             width: 60px; height: 60px;
             background: white; border: 3px solid #333; border-radius: 10px;
@@ -404,13 +404,34 @@
     </div>
 
     <div id="page-15" class="page">
-        <h1 id="p15-title">Quarter Quiz</h1>
-        <div class="feedback" id="p15-count">Question 1 of 10</div>
-        <h2 id="p15-question">How much is this worth?</h2>
-        <p class="hint-text">(Touch each coin to count out loud)</p>
-        <div class="quiz-visuals" id="p15-visuals"></div>
-        <div class="quiz-options" id="p15-options"></div>
+        <h1>Value of the Dimes</h1>
+        <p>Find the value of the dimes, touch the correct amount, and drop it in the box below.</p>
+        <p class="hint-text">(Touch each dime to count by 10s)</p>
+        <div class="drop-container" style="justify-content: center; gap: 40px; margin-bottom: 20px;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="count-box" id="dimes-box-1"></div>
+                <div class="dropzone dropzone-small" id="count-dime-drop-1" onclick="placeDimeNumberInBox('count-dime-drop-1')"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="count-box" id="dimes-box-2"></div>
+                <div class="dropzone dropzone-small" id="count-dime-drop-2" onclick="placeDimeNumberInBox('count-dime-drop-2')"></div>
+            </div>
+        </div>
+        
+        <div class="drag-container" id="num-dime-drag-source" style="min-height: 80px; justify-content: center; gap: 20px;">
+            </div>
+        <button onclick="checkDimeCount()">Check Answers</button>
         <div class="feedback" id="p15-feedback"></div>
+    </div>
+
+    <div id="page-16" class="page">
+        <h1 id="p16-title">Quarter Quiz</h1>
+        <div class="feedback" id="p16-count">Question 1 of 10</div>
+        <h2 id="p16-question">How much is this worth?</h2>
+        <p class="hint-text">(Touch each coin to count out loud)</p>
+        <div class="quiz-visuals" id="p16-visuals"></div>
+        <div class="quiz-options" id="p16-options"></div>
+        <div class="feedback" id="p16-feedback"></div>
     </div>
 
     <div class="nav-buttons">
@@ -418,12 +439,12 @@
         <button id="btn-next" onclick="changePage(1)">Next Page</button>
     </div>
     
-    <div id="page-indicator">Page 1 of 15</div>
+    <div id="page-indicator">Page 1 of 16</div>
 </div>
 
 <script>
     // --- Data and Variables ---
-    const totalPages = 15;
+    const totalPages = 16;
     let currentPage = 1;
 
     const coins = {
@@ -467,7 +488,8 @@
         if(currentPage === 12) initMathQuiz(12, 'nickel');
         if(currentPage === 13) initNickelCountGame();
         if(currentPage === 14) initMathQuiz(14, 'dime');
-        if(currentPage === 15) initMathQuiz(15, 'quarter');
+        if(currentPage === 15) initDimeCountGame();
+        if(currentPage === 16) initMathQuiz(16, 'quarter');
     }
 
     // Initialize indicator on load
@@ -697,7 +719,6 @@
         ev.stopPropagation(); 
         
         if (numElem.parentElement.id !== 'num-drag-source') {
-            // Send back
             document.getElementById('num-drag-source').appendChild(numElem);
             if (activeCountNumber === numElem) {
                 activeCountNumber.classList.remove('selected-number');
@@ -705,7 +726,6 @@
             }
         } 
         else {
-            // Select
             if (activeCountNumber) activeCountNumber.classList.remove('selected-number');
             
             if (activeCountNumber !== numElem) {
@@ -721,7 +741,6 @@
     function placeNumberInBox(boxId) {
         if (activeCountNumber) {
             let dropzone = document.getElementById(boxId);
-            // If full, send existing item back first
             if (dropzone.children.length > 0) {
                 document.getElementById('num-drag-source').appendChild(dropzone.children[0]);
             }
@@ -745,7 +764,6 @@
             fb.style.color = "green";
             speakText("Correct!");
             
-            // Generate a new puzzle after 2 seconds
             setTimeout(initPennyCountGame, 2000);
         } else {
             fb.innerText = "Oops, try again!";
@@ -782,7 +800,7 @@
         const drawNickels = (count, containerId) => {
             let html = '';
             for(let i = 0; i < count; i++) {
-                // Compute the spoken value to count by 5s (5, 10, 15...)
+                // Compute the spoken value to count by 5s
                 let spokenValue = (i + 1) * 5;
                 html += `<img src="nickel.png" class="small-coin size-small-nickel nickel-color" alt="Nickel" onclick="speakText('${spokenValue}')" style="cursor:pointer; transition:transform 0.1s;" onactive="this.style.transform='scale(0.8)'">`;
             }
@@ -862,7 +880,114 @@
         }
     }
 
-    // --- Pages 10, 12, 14, 15 Logic (Math Quizzes & Counting out loud) ---
+    // --- Page 15 Logic (Value of Dimes Game) ---
+    let activeDimeCountNumber = null;
+    let currentDimeValues = [0, 0];
+
+    function initDimeCountGame() {
+        document.getElementById('p15-feedback').innerText = "";
+        if (activeDimeCountNumber) {
+            activeDimeCountNumber.classList.remove('selected-number');
+            activeDimeCountNumber = null;
+        }
+
+        // Generate 2 random numbers of coins (1 to 9)
+        let num1 = Math.floor(Math.random() * 9) + 1;
+        let num2 = Math.floor(Math.random() * 9) + 1;
+        while (num2 === num1) {
+            num2 = Math.floor(Math.random() * 9) + 1;
+        }
+        
+        // Calculate the actual VALUES based on monetary amount (10c)
+        let val1 = num1 * 10;
+        let val2 = num2 * 10;
+        currentDimeValues = [val1, val2];
+
+        // Draw dimes
+        const drawDimes = (count, containerId) => {
+            let html = '';
+            for(let i = 0; i < count; i++) {
+                // Compute the spoken value to count by 10s
+                let spokenValue = (i + 1) * 10;
+                html += `<img src="dime.png" class="small-coin size-small-dime dime-color" alt="Dime" onclick="speakText('${spokenValue}')" style="cursor:pointer; transition:transform 0.1s;" onactive="this.style.transform='scale(0.8)'">`;
+            }
+            document.getElementById(containerId).innerHTML = html;
+        };
+        drawDimes(num1, 'dimes-box-1');
+        drawDimes(num2, 'dimes-box-2');
+
+        // Reset dropzones
+        document.getElementById('count-dime-drop-1').innerHTML = "";
+        document.getElementById('count-dime-drop-2').innerHTML = "";
+
+        // Set up draggable numbers using VALUES instead of counts
+        let vals = [val1, val2].sort(() => Math.random() - 0.5);
+        let dragHtml = '';
+        vals.forEach(v => {
+            dragHtml += `<div class="drag-number" data-val="${v}" onclick="tapDimeNumber(this, event)">${v}</div>`;
+        });
+        document.getElementById('num-dime-drag-source').innerHTML = dragHtml;
+    }
+
+    function tapDimeNumber(numElem, ev) {
+        ev.stopPropagation(); 
+        
+        if (numElem.parentElement.id !== 'num-dime-drag-source') {
+            document.getElementById('num-dime-drag-source').appendChild(numElem);
+            if (activeDimeCountNumber === numElem) {
+                activeDimeCountNumber.classList.remove('selected-number');
+                activeDimeCountNumber = null;
+            }
+        } 
+        else {
+            if (activeDimeCountNumber) activeDimeCountNumber.classList.remove('selected-number');
+            
+            if (activeDimeCountNumber !== numElem) {
+                activeDimeCountNumber = numElem;
+                activeDimeCountNumber.classList.add('selected-number');
+                speakText(numElem.innerText);
+            } else {
+                activeDimeCountNumber = null;
+            }
+        }
+    }
+
+    function placeDimeNumberInBox(boxId) {
+        if (activeDimeCountNumber) {
+            let dropzone = document.getElementById(boxId);
+            if (dropzone.children.length > 0) {
+                document.getElementById('num-dime-drag-source').appendChild(dropzone.children[0]);
+            }
+            dropzone.appendChild(activeDimeCountNumber);
+            activeDimeCountNumber.classList.remove('selected-number');
+            activeDimeCountNumber = null;
+        }
+    }
+
+    function checkDimeCount() {
+        let box1 = document.getElementById('count-dime-drop-1');
+        let box2 = document.getElementById('count-dime-drop-2');
+        
+        let ans1 = box1.children.length > 0 ? parseInt(box1.children[0].dataset.val) : null;
+        let ans2 = box2.children.length > 0 ? parseInt(box2.children[0].dataset.val) : null;
+
+        let fb = document.getElementById('p15-feedback');
+        
+        // Check answers against currentDimeValues
+        if (ans1 === currentDimeValues[0] && ans2 === currentDimeValues[1]) {
+            fb.innerText = "Correct! Loading next puzzle...";
+            fb.style.color = "green";
+            speakText("Correct!");
+            
+            setTimeout(initDimeCountGame, 2000);
+        } else {
+            fb.innerText = "Oops, try again!";
+            fb.style.color = "red";
+            speakText("Oops, try again");
+        }
+    }
+
+    // --- Pages 10, 12, 14, 16 Logic (Math Quizzes & Counting out loud) ---
     let quizState = {};
 
     function initMathQuiz(pageNum, coinKey) {
